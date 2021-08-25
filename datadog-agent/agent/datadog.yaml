@@ -1,0 +1,6 @@
+logs_config:
+  logs_dd_url: "vector:8080"
+  logs_no_ssl: true
+  use_http: true
+
+logs_enabled: true

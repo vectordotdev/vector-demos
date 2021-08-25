@@ -1,0 +1,7 @@
+logs:
+  - type: file
+    path: "/tmp/logs/*.log"
+    service: "datadog-agent"
+    source: "file"
+    tags:
+      - target:vector

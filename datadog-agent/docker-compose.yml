@@ -1,0 +1,29 @@
+version: '2'
+
+services:
+
+  agent:
+    image: gcr.io/datadoghq/agent:7
+    privileged: true
+    volumes:
+      - ./logs:/tmp/logs:ro
+      - ./agent:/etc/datadog-agent
+    environment:
+      - DD_API_KEY=${DD_API_KEY}
+    networks:
+      - local
+
+  vector:
+    image: timberio/vector:nightly-alpine
+    volumes:
+      - ./vector/vector.toml:/etc/vector/vector.toml:ro
+      - ./logs:/tmp/logs
+    environment:
+      - DD_API_KEY=${DD_API_KEY}
+      # if you need vector to be verbose
+      # - LOG=debug
+    networks:
+      - local
+    
+networks:
+  local: {}
