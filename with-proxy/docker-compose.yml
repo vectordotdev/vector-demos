@@ -1,0 +1,32 @@
+version: '2'
+
+services:
+
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx:/etc/nginx:ro
+    networks:
+      - private
+
+  squid:
+    image: babim/squid
+    networks:
+      - public
+      - private
+
+  vector:
+    image: timberio/vector:nightly-alpine
+    volumes:
+      - ./vector/vector.toml:/etc/vector/vector.toml:ro
+    environment:
+      # if you need vector to be verbose put this to DEBUG
+      - LOG=info
+      # can also be done with environment variables
+      # - HTTP_PROXY=http://squid:3128
+    networks:
+      - public
+  
+networks:
+  public: {}
+  private: {}
