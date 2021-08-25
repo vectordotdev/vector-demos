@@ -9,7 +9,8 @@ docker-compose up --detach
 This starts up the full scenario in the background, which includes:
 
 * A Vector [aggregator]
-* 10 Vector [agents][agent] feeding JSON logs into the aggregator
+* 5 Vector [agents][agent] feeding JSON logs from an HTTP server into the aggregator
+* 5 Vector agents feeding Syslog logs into the aggregator
 
 You can see the aggregator output in real-time by running this command:
 

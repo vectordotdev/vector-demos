@@ -1,11 +1,20 @@
 version: '3.8'
 services:
-  agent:
+  http_logs_agent:
     image: timberio/vector:nightly-alpine
     deploy:
-      replicas: 10
+      replicas: 5
     volumes:
-      - ./vector/agent:/etc/vector:ro
+      - ./vector/agent/http:/etc/vector:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - aggregator
+  syslog_logs_agent:
+    image: timberio/vector:nightly-alpine
+    deploy:
+      replicas: 5
+    volumes:
+      - ./vector/agent/syslog:/etc/vector:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - aggregator

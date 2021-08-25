@@ -3,9 +3,18 @@ type = "vector"
 address = "0.0.0.0:9000"
 version = "2"
 
-[transforms.sanitize]
-type = "remap"
+[transforms.router]
+type = "route"
 inputs = ["in"]
+
+[transforms.router.route]
+http_logs = '.tag == "http_logs"'
+syslog_logs = '.tag == "syslog_logs"'
+
+
+[transforms.parse_and_sanitize_http_logs]
+type = "remap"
+inputs = ["router.http_logs"]
 source = '''
 . = parse_json!(.message)
 
@@ -13,52 +22,61 @@ source = '''
 del(."user-identifier")
 
 # Convert raw .bytes field into a resource string
+# (no need for error handling as we know we're not dividing by zero)
 kb, _ = .bytes / 1024
 
 .size = to_string(round(kb)) + "kB"
 del(.bytes)
 
 # Convert HTTP status to integer
-status, err = to_int(del(.status))
-if err != null {
-  log(err, level: "error")
-}
+status = to_int!(del(.status))
 
 # Add a success field based on HTTP status
 .success = status >= 200 && status <= 400
 
 # Convert IP to IPv6
-.host, err = ip_to_ipv6(.host)
-if err != null {
-  log(err, level: "error")
-}
+.host = ip_to_ipv6!(.host)
 
-url, err = parse_url(.referer)
-if err != null {
-  log(err, level: "error")
-}
-
-# Display only the host for the referrer
+# Display only the host for the referer
+url = parse_url!(.referer)
 .referer = url.host
 
 # Provide Unix timestamp
-ts, err = parse_timestamp(del(.datetime), format: "%d/%b/%Y:%T")
-if err != nil {
-  log(err, level: "error")
-}
-
+ts = parse_timestamp!(del(.datetime), format: "%d/%b/%Y:%T")
 .timestamp = to_unix_timestamp(ts)
 '''
 
+# Convert Syslog logs to JSON objects
+[transforms.parse_and_sanitize_syslog_logs]
+type = "remap"
+inputs = ["router.syslog_logs"]
+source = '''
+. = parse_syslog!(.message)
+
+# Provide a Unix timestamp
+ts = parse_timestamp!(.timestamp, format: "%+")
+.timestamp = to_unix_timestamp(ts)
+
+# Delete some unnecessary fields
+del(.msgid)
+del(.procid)
+'''
+
 # Filter out OPTION requests
-[transforms.filter]
+[transforms.filter_http_logs]
 type = "filter"
-inputs = ["sanitize"]
+inputs = ["parse_and_sanitize_http_logs"]
 condition = '!includes(["OPTION", "HEAD"], .method) && .request != "/wp-admin"'
+
+# Filter out non-urgent logs
+[transforms.filter_syslog_logs]
+type = "filter"
+inputs = ["parse_and_sanitize_syslog_logs"]
+condition = 'to_syslog_severity!(.severity) < 4'
 
 [sinks.out]
 type = "console"
-inputs = ["filter"]
+inputs = ["filter_http_logs", "filter_syslog_logs"]
 target = "stdout"
 
 [sinks.out.encoding]
