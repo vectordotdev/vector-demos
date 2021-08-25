@@ -1,6 +1,7 @@
 [sources.in]
 type = "generator"
 format = "json"
+interval = 0.5
 
 [sinks.out]
 type = "vector"

@@ -1,7 +1,23 @@
 version: '3.8'
 services:
-  agent:
-    container_name: agent
+  agent1:
+    container_name: agent1
+    image: timberio/vector:nightly-alpine
+    volumes:
+      - ./vector/agent:/etc/vector:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - aggregator
+  agent2:
+    container_name: agent2
+    image: timberio/vector:nightly-alpine
+    volumes:
+      - ./vector/agent:/etc/vector:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    depends_on:
+      - aggregator
+  agent3:
+    container_name: agent3
     image: timberio/vector:nightly-alpine
     volumes:
       - ./vector/agent:/etc/vector:ro
