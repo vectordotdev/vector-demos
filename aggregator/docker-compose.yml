@@ -13,7 +13,6 @@ services:
     container_name: aggregator
     image: timberio/vector:nightly-alpine
     ports:
-      - 8686:8686
       - 9000:9000
     environment:
       - LOG=info
