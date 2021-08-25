@@ -1,27 +1,12 @@
 version: '3.8'
 services:
-  agent1:
-    container_name: agent1
+  agent:
     image: timberio/vector:nightly-alpine
+    deploy:
+      replicas: 10
     volumes:
       - ./vector/agent:/etc/vector:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - aggregator
-  agent2:
-    container_name: agent2
-    image: timberio/vector:nightly-alpine
-    volumes:
-      - ./vector/agent:/etc/vector:ro
-      - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - aggregator
-  agent3:
-    container_name: agent3
-    image: timberio/vector:nightly-alpine
-    volumes:
-      - ./vector/agent:/etc/vector:ro
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - aggregator
   aggregator:
@@ -29,8 +14,9 @@ services:
     image: timberio/vector:nightly-alpine
     ports:
       - 8686:8686
+      - 9000:9000
     environment:
-      - LOG=debug
+      - LOG=info
     volumes:
       - ./vector/aggregator:/etc/vector:ro
-      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/run/docker.sock:/var/run/docker.sock:ro

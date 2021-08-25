@@ -1,12 +1,12 @@
 [sources.in]
 type = "generator"
 format = "json"
-interval = 0.5
+interval = 2
 
 [sinks.out]
 type = "vector"
 inputs = ["in"]
-address = "aggregator:6000"
+address = "aggregator:9000"
 version = "2"
 
 [sinks.out.healthcheck]

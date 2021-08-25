@@ -5,5 +5,5 @@
 docker-compose up --detach
 
 # Run vector tap
-vector tap --url http://localhost:8686/graphql
+docker-compose logs --follow aggregator
 ```
