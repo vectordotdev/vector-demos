@@ -18,9 +18,3 @@ services:
     volumes:
       - ./vector/aggregator:/etc/vector:ro
       - /var/run/docker.sock:/var/run/docker.sock
-  tap:
-    container_name: tap
-    image: timberio/vector:nightly-alpine
-    command: ["tap", "--url", "http://aggregator:8686/graphql"]
-    depends_on:
-      - agent
