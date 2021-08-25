@@ -1,0 +1,12 @@
+[sources.in]
+type = "generator"
+format = "json"
+
+[sinks.out]
+type = "vector"
+inputs = ["in"]
+address = "aggregator:6000"
+version = "2"
+
+[sinks.out.healthcheck]
+enabled = true
