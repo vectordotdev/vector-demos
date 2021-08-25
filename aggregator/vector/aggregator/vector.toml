@@ -1,0 +1,65 @@
+[sources.in]
+type = "vector"
+address = "0.0.0.0:9000"
+version = "2"
+
+[transforms.sanitize]
+type = "remap"
+inputs = ["in"]
+source = '''
+. = parse_json!(.message)
+
+# Remove user information
+del(."user-identifier")
+
+# Convert raw .bytes field into a resource string
+kb, _ = .bytes / 1024
+
+.size = to_string(round(kb)) + "kB"
+del(.bytes)
+
+# Convert HTTP status to integer
+status, err = to_int(del(.status))
+if err != null {
+  log(err, level: "error")
+}
+
+# Add a success field based on HTTP status
+.success = status >= 200 && status <= 400
+
+# Convert IP to IPv6
+.host, err = ip_to_ipv6(.host)
+if err != null {
+  log(err, level: "error")
+}
+
+url, err = parse_url(.referer)
+if err != null {
+  log(err, level: "error")
+}
+
+# Display only the host for the referrer
+.referer = url.host
+
+# Provide Unix timestamp
+ts, err = parse_timestamp(del(.datetime), format: "%d/%b/%Y:%T")
+if err != nil {
+  log(err, level: "error")
+}
+
+.timestamp = to_unix_timestamp(ts)
+'''
+
+# Filter out OPTION requests
+[transforms.filter]
+type = "filter"
+inputs = ["sanitize"]
+condition = '!includes(["OPTION", "HEAD"], .method) && .request != "/wp-admin"'
+
+[sinks.out]
+type = "console"
+inputs = ["filter"]
+target = "stdout"
+
+[sinks.out.encoding]
+codec = "json"
