@@ -1,20 +1,24 @@
-[sources.in]
+[sources.vector_agents]
 type = "vector"
 address = "0.0.0.0:9000"
 version = "2"
 
-[transforms.router]
-type = "route"
-inputs = ["in"]
+[sources.fluent_bit_agents]
+type = "fluent"
+address = "0.0.0.0:24224"
 
-[transforms.router.route]
+[transforms.logs_router]
+type = "route"
+inputs = ["vector_agents"]
+
+[transforms.logs_router.route]
 http_logs = '.tag == "http_logs"'
 syslog_logs = '.tag == "syslog_logs"'
-
+fluent_bit_logs = '.tag == "fluent_bit_logs"'
 
 [transforms.parse_and_sanitize_http_logs]
 type = "remap"
-inputs = ["router.http_logs"]
+inputs = ["logs_router.http_logs"]
 source = '''
 . = parse_json!(.message)
 
@@ -49,7 +53,7 @@ ts = parse_timestamp!(del(.datetime), format: "%d/%b/%Y:%T")
 # Convert Syslog logs to JSON objects
 [transforms.parse_and_sanitize_syslog_logs]
 type = "remap"
-inputs = ["router.syslog_logs"]
+inputs = ["logs_router.syslog_logs"]
 source = '''
 . = parse_syslog!(.message)
 
@@ -74,10 +78,18 @@ type = "filter"
 inputs = ["parse_and_sanitize_syslog_logs"]
 condition = 'to_syslog_severity!(.severity) < 4'
 
-[sinks.out]
+[sinks.json_out]
 type = "console"
 inputs = ["filter_http_logs", "filter_syslog_logs"]
 target = "stdout"
 
-[sinks.out.encoding]
+[sinks.json_out.encoding]
 codec = "json"
+
+[sinks.text_out]
+type = "console"
+inputs = ["fluent_bit_agents"]
+target = "stdout"
+
+[sinks.text_out.encoding]
+codec = "text"
