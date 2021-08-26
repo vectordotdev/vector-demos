@@ -6,7 +6,6 @@ services:
       replicas: 5
     volumes:
       - ./vector/agent/http:/etc/vector:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - aggregator
   syslog_logs_agent:
@@ -15,7 +14,6 @@ services:
       replicas: 5
     volumes:
       - ./vector/agent/syslog:/etc/vector:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
     depends_on:
       - aggregator
   aggregator:
@@ -27,4 +25,3 @@ services:
       - LOG=info
     volumes:
       - ./vector/aggregator:/etc/vector:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
