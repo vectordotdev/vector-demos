@@ -22,7 +22,6 @@ services:
       replicas: 3
     volumes:
       - ./fluent-bit:/fluent-bit/etc:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
   aggregator:
     container_name: aggregator
     image: timberio/vector:nightly-alpine
