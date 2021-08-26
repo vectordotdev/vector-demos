@@ -9,7 +9,7 @@ address = "0.0.0.0:24224"
 
 [transforms.logs_router]
 type = "route"
-inputs = ["vector_agents"]
+inputs = ["*_agents"]
 
 [transforms.logs_router.route]
 http_logs = '.tag == "http_logs"'
@@ -66,6 +66,16 @@ del(.msgid)
 del(.procid)
 '''
 
+[transforms.parse_and_sanitize_fluent_bit_logs]
+type = "remap"
+inputs = ["logs_router.fluent_bit_logs"]
+source = '''
+ts = parse_timestamp!(.timestamp, format: "%+")
+ts = to_unix_timestamp(ts)
+
+. = { "value": .rand_value, "host": ip_to_ipv6!(.host), "timestamp": ts }
+'''
+
 # Filter out OPTION requests
 [transforms.filter_http_logs]
 type = "filter"
@@ -80,16 +90,8 @@ condition = 'to_syslog_severity!(.severity) < 4'
 
 [sinks.json_out]
 type = "console"
-inputs = ["filter_http_logs", "filter_syslog_logs"]
+inputs = ["filter_*", "parse_and_sanitize_fluent_bit_logs"]
 target = "stdout"
 
 [sinks.json_out.encoding]
 codec = "json"
-
-[sinks.text_out]
-type = "console"
-inputs = ["fluent_bit_agents"]
-target = "stdout"
-
-[sinks.text_out.encoding]
-codec = "text"

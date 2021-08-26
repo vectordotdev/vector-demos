@@ -3,7 +3,7 @@ services:
   http_logs_agent:
     image: timberio/vector:nightly-alpine
     deploy:
-      replicas: 5
+      replicas: 3
     volumes:
       - ./vector/agent/http:/etc/vector:ro
     depends_on:
@@ -11,13 +11,15 @@ services:
   syslog_logs_agent:
     image: timberio/vector:nightly-alpine
     deploy:
-      replicas: 5
+      replicas: 3
     volumes:
       - ./vector/agent/syslog:/etc/vector:ro
     depends_on:
       - aggregator
   fluentbit_agent:
     image: fluent/fluent-bit:1.8
+    deploy:
+      replicas: 3
     volumes:
       - ./fluent-bit:/fluent-bit/etc:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
