@@ -1,0 +1,29 @@
+[enrichment_tables.users]
+type = "file"
+file.path = "/var/lib/vector/data/users.csv"
+file.encoding.type = "csv"
+
+[sources.random]
+type = "generator"
+format = "shuffle"
+lines = [
+  '{"first_name": "Karolann", "last_name": "Wiza", "message": "Hello World"}',
+  '{"first_name": "Nick", "last_name": "Adams", "message": "Hello World"}',
+  '{"first_name": "Hilbert", "last_name": "Stark", "message": "Hello World"}',
+  '{"first_name": "Irwin", "last_name": "Green", "message": "Hello World"}',
+  '{"first_name": "Katlyn", "last_name": "Steuber", "message": "Hello World"}',
+]
+interval = 2
+
+[transforms.remap]
+type = "remap"
+inputs = ["random"]
+source = """
+. = parse_json(.message) ?? {}
+. |= get_enrichment_table_record("users", { "last_name": .last_name, "first_name": .first_name }) ?? {}
+"""
+
+[sinks.console]
+type = "console"
+inputs = ["remap"]
+encoding.codec = "json"
