@@ -6,6 +6,6 @@ services:
       - 8686:8686
     environment:
       - DD_API_KEY
-      - LOG=debug
+      - LOG=info
     volumes:
       - ./vector:/etc/vector:ro

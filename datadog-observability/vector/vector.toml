@@ -22,12 +22,28 @@ type = "internal_logs"
 [sources.vector_metrics]
 type = "internal_metrics"
 
+[transforms.tag_vector_logs]
+type = "remap"
+inputs = ["vector_logs"]
+source = '''
+.tag = "vector"
+'''
+
 [sinks.datadog_logs]
 type = "datadog_logs"
-inputs = ["vector_logs"]
+inputs = ["tag_vector_logs"]
 default_api_key = "${DD_API_KEY}"
+
+[sinks.datadog_logs.healthcheck]
+enabled = true
+
+[sinks.datadog_logs.encoding]
+codec = "json"
 
 [sinks.datadog_metrics]
 type = "datadog_metrics"
 inputs = ["vector_metrics"]
 api_key = "${DD_API_KEY}"
+
+[sinks.datadog_metrics.healthcheck]
+enabled = true
