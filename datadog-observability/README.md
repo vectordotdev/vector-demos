@@ -9,7 +9,7 @@ To run this scenario, make sure you have the `DD_API_KEY` environment variable s
 API key and then run:
 
 ```bash
-docker compose up --detach --remove-orphans
+docker compose up --detach
 ```
 
 Once Vector is up and running, check out the [Logs exporer][logs] and this simple
