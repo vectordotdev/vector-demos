@@ -15,5 +15,5 @@ docker compose up --detach --remove-orphans
 Once Vector is up and running, check out the [Logs exporer][logs] and this simple
 [Metrics dashboard][metrics].
 
-[logs]: https://app.datadoghq.com/logs?query=%40tag%3Avector
+[logs]: https://app.datadoghq.com/logs?query=%40tag%3Avector_internal
 [metrics]: https://app.datadoghq.com/metric/explorer?live=true&tile_size=m&exp_metric=vector.events_in_total&exp_agg=avg&exp_row_type=metric
