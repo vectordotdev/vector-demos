@@ -1,3 +1,8 @@
+[api]
+enabled = true
+address = "0.0.0.0:8686"
+playground = true
+
 [sources.vector_agents]
 type = "vector"
 address = "0.0.0.0:9000"
