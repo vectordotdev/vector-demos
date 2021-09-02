@@ -1,0 +1,10 @@
+version: '3.9'
+services:
+  vector:
+    image: timberio/vector:0.16.1-alpine
+    ports:
+      - 8686:8686
+    environment:
+      - DD_API_KEY
+    volumes:
+      - ./vector:/etc/vector:ro

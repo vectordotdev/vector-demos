@@ -1,0 +1,33 @@
+[api]
+enabled = true
+address = "0.0.0.0:8686"
+playground = true
+
+[sources.generator]
+type = "generator"
+format = "json"
+interval = 0.5
+
+[sinks.stdout]
+type = "console"
+inputs = ["generator"]
+target = "stdout"
+
+[sinks.stdout.encoding]
+codec = "json"
+
+[sources.vector_logs]
+type = "internal_logs"
+
+[sources.vector_metrics]
+type = "internal_metrics"
+
+[sinks.datadog_logs]
+type = "datadog_logs"
+inputs = ["vector_logs"]
+default_api_key = "${DD_API_KEY}"
+
+[sinks.datadog_metrics]
+type = "datadog_metrics"
+inputs = ["vector_metrics"]
+api_key = "${DD_API_KEY}"
