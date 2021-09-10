@@ -1,0 +1,120 @@
+role: Stateless-Aggregator
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+env:
+  - name: DATADOG_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: vector
+        key: DATADOG_API_KEY
+
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9090"
+
+service:
+  type: NodePort
+
+customConfig:
+  api:
+    enabled: true
+    address: 127.0.0.1:8686
+  sources:
+    datadog_agents:
+      type: datadog_agent
+      acknowledgements: true
+      address: 0.0.0.0:8080
+    internal_metrics:
+      type: internal_metrics
+  transforms:
+    add_tags:
+      type: remap
+      inputs:
+        - datadog_agents
+      source: |
+        .ddtags = string!(.ddtags) + ",sender:vector"
+  sinks:
+    to_datadog:
+      type: datadog_logs
+      inputs:
+        - add_tags
+      default_api_key: "${DATADOG_API_KEY}"
+      encoding:
+        codec: json
+    prom_exporter:
+      type: prometheus_exporter
+      inputs:
+        - internal_metrics
+      address: 0.0.0.0:9090
+
+haproxy:
+  enabled: true
+
+  podAnnotations:
+    ad.datadoghq.com/haproxy.logs: '[{"source":"haproxy","service":"vector-haproxy"}]'
+    ad.datadoghq.com/haproxy.check_names: '["haproxy"]'
+    ad.datadoghq.com/haproxy.init_configs: "[{}]"
+    ad.datadoghq.com/haproxy.instances: |
+      [
+        {
+          "use_prometheus": true,
+          "prometheus_url": "http://%%host%%:1024/metrics"
+        }
+      ]
+
+  customConfig: |
+    global
+      log stdout local0
+      maxconn 4096
+      stats socket /tmp/haproxy
+      hard-stop-after 60s
+
+    defaults
+      log     global
+      option  httplog
+      option  dontlognull
+      retries 3
+      option  redispatch
+      option  allbackups
+      timeout client 5s
+      timeout server 5s
+      timeout connect 5s
+
+    resolvers coredns
+      nameserver dns1 kube-dns.kube-system.svc.cluster.local:53
+      resolve_retries 3
+      timeout resolve 2s
+      timeout retry 1s
+      accepted_payload_size 8192
+      hold valid 10s
+      hold obsolete 15s
+
+    frontend stats
+      mode http
+      bind :::1024
+      http-request use-service prometheus-exporter if { path /metrics }
+
+    frontend datadog-agents
+      mode http
+      bind :::8080
+      log global
+      default_backend datadog-agents
+
+    backend datadog-agents
+      mode http
+      balance roundrobin
+      log global
+      option tcp-check
+      server-template srv 10 _datadog-agents._tcp.vector-headless.vector.svc.cluster.local resolvers coredns check

@@ -1,0 +1,18 @@
+datadog:
+  clusterName: vector-demo
+  logs:
+    containerCollectAll: true
+    enabled: true
+  orchestratorExplorer:
+    enabled: true
+  processAgent:
+    processCollection: true
+  prometheusScrape:
+    enabled: true
+agents:
+  useConfigMap: true
+  customAgentConfig:
+    logs_config:
+      logs_dd_url: "vector-haproxy.vector.svc.cluster.local:8080"
+      logs_no_ssl: true
+      use_http: true
