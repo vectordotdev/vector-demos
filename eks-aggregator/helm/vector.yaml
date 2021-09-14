@@ -24,9 +24,6 @@ podAnnotations:
   prometheus.io/scrape: "true"
   prometheus.io/port: "9090"
 
-service:
-  type: NodePort
-
 customConfig:
   api:
     enabled: true
@@ -92,7 +89,7 @@ haproxy:
       option  redispatch
       option  allbackups
       timeout client 5s
-      timeout server 5s
+      timeout server 50s
       timeout connect 5s
 
     resolvers coredns
