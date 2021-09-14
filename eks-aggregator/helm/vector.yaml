@@ -44,7 +44,10 @@ customConfig:
       inputs:
         - datadog_agents
       source: |
-        .ddtags = string!(.ddtags) + ",sender:vector"
+        .ddtags = parse_key_value!(.ddtags, key_value_delimiter: ":", field_delimiter: ",")
+        .ddtags.sender = "vector"
+        .ddtags.vector_aggregator = get_hostname!()
+        .ddtags = encode_key_value(.ddtags, key_value_delimiter: ":", field_delimiter: ",")
   sinks:
     to_datadog:
       type: datadog_logs
