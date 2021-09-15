@@ -50,7 +50,7 @@ customConfig:
           parse_json(.message) ??
           parse_syslog(.message) ??
           {}
-        merge(., object!(parsed))
+        . = merge(., object!(parsed))
   sinks:
     to_datadog:
       type: datadog_logs
