@@ -13,6 +13,7 @@ agents:
   useConfigMap: true
   customAgentConfig:
     logs_config:
-      logs_dd_url: "vector-haproxy.vector.svc.cluster.local:8080"
+      logs_dd_url: "internal-k8s-vector-vector-e67b4af534-965797666.us-east-1.elb.amazonaws.com:8080"
       logs_no_ssl: true
       use_http: true
+      use_v2_api: false

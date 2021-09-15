@@ -27,7 +27,7 @@ podAnnotations:
 customConfig:
   api:
     enabled: true
-    address: 127.0.0.1:8686
+    address: 0.0.0.0:8686
   sources:
     datadog_agents:
       type: datadog_agent
@@ -45,6 +45,12 @@ customConfig:
         .ddtags.sender = "vector"
         .ddtags.vector_aggregator = get_hostname!()
         .ddtags = encode_key_value(.ddtags, key_value_delimiter: ":", field_delimiter: ",")
+
+        parsed =
+          parse_json(.message) ??
+          parse_syslog(.message) ??
+          {}
+        merge(., object!(parsed))
   sinks:
     to_datadog:
       type: datadog_logs
@@ -60,7 +66,7 @@ customConfig:
       address: 0.0.0.0:9090
 
 haproxy:
-  enabled: true
+  enabled: false
 
   podAnnotations:
     ad.datadoghq.com/haproxy.logs: '[{"source":"haproxy","service":"vector-haproxy"}]'
@@ -117,4 +123,4 @@ haproxy:
       balance roundrobin
       log global
       option tcp-check
-      server-template srv 10 _datadog-agents._tcp.vector-headless.vector.svc.cluster.local resolvers coredns check
+      server-template srv 5 _datadog-agents._tcp.vector-headless.vector.svc.cluster.local resolvers coredns check
