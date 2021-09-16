@@ -1,5 +1,8 @@
 role: Stateless-Aggregator
 
+image:
+  tag: nightly-2021-09-16-distroless-libc
+
 autoscaling:
   enabled: true
   minReplicas: 2
@@ -36,7 +39,7 @@ customConfig:
     internal_metrics:
       type: internal_metrics
   transforms:
-    add_tags:
+    remap:
       type: remap
       inputs:
         - datadog_agents
@@ -49,13 +52,30 @@ customConfig:
         parsed =
           parse_json(.message) ??
           parse_syslog(.message) ??
+          parse_apache_log(.message, format: "common") ??
           {}
+
+        if is_integer(parsed.status) {
+          parsed.http.status_code = del(parsed.status)
+          if parsed.http.status_code >= 500 && parsed.http.status_code < 600 { parsed.status = "error" }
+          if parsed.http.status_code >= 400 && parsed.http.status_code < 500 { parsed.status = "warn" }
+          if parsed.http.status_code >= 300 && parsed.http.status_code < 400 { parsed.status = "info" }
+          if parsed.http.status_code >= 200 && parsed.http.status_code < 300 { parsed.status = "ok" }
+        }
+
+        if exists(parsed.method) { parsed.http.method = del(parsed.method) }
+        if exists(parsed.referer) { parsed.http.referer = del(parsed.referer) }
+        if exists(parsed.path) { parsed.http.url_details.path = del(parsed.path) }
+        if exists(parsed.host) { parsed.network.client.ip = del(parsed.host) }
+
         . = merge(., object!(parsed))
+
+        .uuid = uuid_v4()
   sinks:
     to_datadog:
       type: datadog_logs
       inputs:
-        - add_tags
+        - remap
       default_api_key: "${DATADOG_API_KEY}"
       encoding:
         codec: json

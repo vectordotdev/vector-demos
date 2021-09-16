@@ -1,4 +1,5 @@
 datadog:
+  logLevel: debug
   clusterName: vector-demo
   logs:
     containerCollectAll: true
