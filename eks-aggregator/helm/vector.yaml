@@ -95,7 +95,7 @@ ingress:
     alb.ingress.kubernetes.io/target-type: ip
     kubernetes.io/ingress.class: alb
   hosts:
-    - host: internal-k8s-vector-vector-e67b4af534-965797666.us-east-1.elb.amazonaws.com
+    - host: vector.mycompany.tld
       paths:
         - path: /
           pathType: Prefix
