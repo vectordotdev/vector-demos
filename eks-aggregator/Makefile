@@ -2,7 +2,7 @@ ifndef ACCOUNT_ID
 $(error ACCOUNT_ID is not set)
 endif
 .PHONY: cluster-up
-up:
+cluster-up:
 	eksctl create cluster --with-oidc --name vector-demo
 	aws iam create-policy \
 		--policy-name AWSLoadBalancerControllerIAMPolicy \
@@ -27,7 +27,7 @@ up:
 	kubectl create namespace datadog 
 
 .PHONY: cluster-down
-down:
+cluster-down:
 	helm uninstall aws-load-balancer-controller \
 		--namespace kube-system
 	kubectl delete namespace vector 
