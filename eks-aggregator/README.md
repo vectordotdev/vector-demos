@@ -33,20 +33,29 @@ feature, allowing you to move your log processing onto your own hardware.
 helm upgrade --install vector vector/vector --devel \
 	--namespace vector --values helm/vector.yaml \
 	--set secrets.generic.DATADOG_API_KEY=<DD_API_KEY(base64 encoded)> \
-	--set ingress.hosts[0].host=<ALB_HOSTNAME>
+	--set ingress.hosts[0].host=DUMMY_VAL
 ```
 
-Once your ALB is provisioned you can run the following command to extract it's generated hostname. Run the above command again, substituting your generated hostname in the last `set` option.
+Once your ALB is provisioned you can run the following command to extract it's generated hostname to replace the DUMMY_VAL above.
 
 ```shell
-kubectl --namespace vector get ingress vector \
+export ALB_HOSTNAME=kubectl --namespace vector get ingress vector \
 	--output go-template='{{(index .status.loadBalancer.ingress 0 ).hostname}}'
+```
+
+The following command will upgrade your `vector` release with the created ALB hostname.
+
+```shell
+helm upgrade --install vector vector/vector --devel \
+	--namespace vector --values helm/vector.yaml \
+	--set secrets.generic.DATADOG_API_KEY=<DD_API_KEY(base64 encoded)> \
+	--set ingress.hosts[0].host=${ALB_HOSTNAME}
 ```
 
 Then install your Datadog Agents substituting the hostname from the previous step.
 
 ```shell
-helm upgrade --install datadog datadog/dataodg \
+helm upgrade --install datadog datadog/datadog \
 	--namespace datadog --values helm/datadog.yaml \
 	--set datadog.apiKey=<DD_API_KEY> \
 	--set agents.customAgentConfig.logs_config.logs_dd_url="<ALB_HOSTNAME>:8080"
