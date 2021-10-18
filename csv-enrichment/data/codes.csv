@@ -1,0 +1,4 @@
+code,tag,message
+1,"EPERM","Operation not permitted"
+2,"ENOENT","No such file or directory"
+3,"ESRCH","No such process"
