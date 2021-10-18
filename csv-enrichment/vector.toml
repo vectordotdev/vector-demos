@@ -55,14 +55,15 @@ source = """
 type = "remap"
 inputs = ["coded_error_messages"]
 source = """
-. = parse_json(.message) ?? {}
+. = parse_json!(.message)
 
 row, err = get_enrichment_table_record("codes", { "code": del(.code) })
+
 if err != null {
   log(err, level: "error")
+} else {
+  . |= merge(., {"message": row.message, "tag": row.tag})
 }
-
-. |= merge(., {"message": row.message, "tag": row.tag})
 """
 
 [sinks.console]
