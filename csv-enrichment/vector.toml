@@ -57,9 +57,12 @@ inputs = ["coded_error_messages"]
 source = """
 . = parse_json(.message) ?? {}
 
-row = get_enrichment_table_record!("codes", { "code": del(.code) })
-.message = row.message
-.tag = row.tag
+row, err = get_enrichment_table_record("codes", { "code": del(.code) })
+if err != null {
+  log(err, level: "error")
+}
+
+. |= merge(., {"message": row.message, "tag": row.tag})
 """
 
 [sinks.console]
