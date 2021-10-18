@@ -20,7 +20,7 @@ tag = "string"
 message = "string"
 
 # Generate user info messages
-[sources.random_user_info]
+[sources.user_info_messages]
 type = "generator"
 format = "shuffle"
 lines = [
@@ -43,9 +43,9 @@ lines = [
 ]
 interval = 2
 
-[transforms.remap_random_user_info]
+[transforms.remap_user_info]
 type = "remap"
-inputs = ["random_user_info"]
+inputs = ["user_info_messages"]
 source = """
 . = parse_json(.message) ?? {}
 . |= get_enrichment_table_record("users", { "last_name": .last_name, "first_name": .first_name }) ?? {}
