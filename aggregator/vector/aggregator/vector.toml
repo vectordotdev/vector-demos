@@ -18,8 +18,22 @@ inputs = ["*_agents"]
 
 [transforms.logs_router.route]
 http_logs = '.tag == "http_logs"'
+transaction_logs = '.tag == "transaction_logs"'
 syslog_logs = '.tag == "syslog_logs"'
 fluent_bit_logs = '.tag == "fluent_bit_logs"'
+
+[transforms.redact_transaction_logs]
+type = "remap"
+inputs = ["logs_router.transaction_logs"]
+source = '''
+# Parse JSON string
+. = parse_json!(.message)
+
+# Apply email address redaction filter
+. = redact(., filters: [
+  r'(\w+)@(\w+).(\w+)'
+])
+'''
 
 [transforms.parse_and_sanitize_http_logs]
 type = "remap"
@@ -95,7 +109,7 @@ condition = 'to_syslog_severity!(.severity) < 4'
 
 [sinks.json_out]
 type = "console"
-inputs = ["filter_*", "parse_and_sanitize_fluent_bit_logs"]
+inputs = ["filter_*", "parse_and_sanitize_fluent_bit_logs", "redact_transaction_logs"]
 target = "stdout"
 
 [sinks.json_out.encoding]
