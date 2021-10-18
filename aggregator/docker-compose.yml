@@ -8,6 +8,14 @@ services:
       - ./vector/agent/http:/etc/vector:ro
     depends_on:
       - aggregator
+  transaction_logs_agent:
+    image: timberio/vector:nightly-alpine
+    deploy:
+      replicas: 3
+    volumes:
+      - ./vector/agent/transaction:/etc/vector:ro
+    depends_on:
+      - aggregator
   syslog_logs_agent:
     image: timberio/vector:nightly-alpine
     deploy:

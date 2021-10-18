@@ -1,0 +1,24 @@
+[sources.logs]
+type = "generator"
+format = "shuffle"
+lines = [
+  '{"transaction":{"id":"d71dc34a-ff0c-4708-afb3-bed232ac879e","result":"success"},"user":{"username":"victory1337","email":"vic@vector.biz"}}',
+  '{"transaction":{"id":"1251afbc-481a-45a1-abe4-caa3a9dfc2b3","result":"cancel"},"user":{"username":"socrates21","email":"socrates@forms.biz"}}'
+]
+interval = 2
+
+[transforms.tag]
+type = "remap"
+inputs = ["logs"]
+source = '''
+.tag = "transaction_logs"
+'''
+
+[sinks.out]
+type = "vector"
+inputs = ["tag"]
+address = "aggregator:9000"
+version = "2"
+
+[sinks.out.healthcheck]
+enabled = true
