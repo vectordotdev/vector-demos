@@ -20,8 +20,6 @@ if .name == "utilization" {
 .tags = {
   "env": "staging"
 }
-
-.timestamp = format_timestamp!(now(), "%s")
 '''
 
 [sinks.console_out]
