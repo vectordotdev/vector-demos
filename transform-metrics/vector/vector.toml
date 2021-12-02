@@ -1,0 +1,31 @@
+[sources.vector_metrics]
+type = "internal_metrics"
+scrape_interval_secs = 5
+
+[transforms.limit_cardinality]
+type = "tag_cardinality_limit"
+inputs = ["vector_metrics"]
+mode = "exact"
+
+# Change the namespace and add tags to each metric; conditionally change
+# the metric name
+[transforms.modify_metrics]
+type = "remap"
+inputs = ["limit_cardinality"]
+source = '''
+if .name == "utilization" {
+  .name = "component_utilization"
+}
+
+.tags = {
+  "env": "staging"
+}
+
+.timestamp = format_timestamp!(now(), "%s")
+'''
+
+[sinks.console_out]
+type = "console"
+inputs = ["modify_metrics"]
+target = "stdout"
+encoding = { codec = "json" }
