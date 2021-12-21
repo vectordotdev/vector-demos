@@ -1,0 +1,7 @@
+sinks:
+  debug:
+    type: console
+    target: stderr
+    encoding: json
+    inputs:
+      - demo

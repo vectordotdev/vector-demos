@@ -1,0 +1,4 @@
+vector-aggregator:
+  extraConfigDirSources:
+    - configMap:
+        name: configs
