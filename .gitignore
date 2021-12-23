@@ -1,2 +1,4 @@
 auth_token
 *.log
+
+charts/

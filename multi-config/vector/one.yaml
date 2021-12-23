@@ -1,0 +1,4 @@
+sources:
+  demo:
+    type: demo_logs
+    format: syslog
