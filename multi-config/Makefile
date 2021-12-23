@@ -12,4 +12,4 @@ stop-k8s:
 	@helm uninstall -n vector test
 
 logs-k8s:
-	@kubectl logs -n vector test-vector-aggregator-0
+	@kubectl logs -n vector test-vector-0

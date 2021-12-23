@@ -3,6 +3,6 @@ name: multi-config-vector
 version: 1.0.0
 description: A demonstration of multiple ConfigMaps being merged into a single Vector config.
 dependencies:
-  - name: vector-aggregator
-    version: ~0.19.1
+  - name: vector
+    version: ~0.2
     repository: https://helm.vector.dev
