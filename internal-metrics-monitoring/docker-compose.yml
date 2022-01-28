@@ -1,0 +1,24 @@
+version: '3.9'
+
+services:
+  vector:
+    image: timberio/vector:latest-alpine
+    environment:
+      - LOG=info
+    networks:
+      - backend
+    volumes:
+      - ./vector:/etc/vector:ro
+
+  prometheus:
+    image: bitnami/prometheus:latest
+    networks:
+      - backend
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus/prometheus.yml:/opt/bitnami/prometheus/conf/prometheus.yml:ro
+
+networks:
+  backend: {}
+
