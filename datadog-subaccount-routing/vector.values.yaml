@@ -1,0 +1,83 @@
+role: "Stateless-Aggregator"
+
+replicas: 1
+
+service:
+  ports:
+  - protocol: TCP
+    port: 8282
+    targetPort: 8282
+
+image:
+  tag: "nightly-2022-06-01-distroless-libc"
+
+extraVolumes:
+  - name: namespace-api-keys
+    configMap:
+      name: namespace-api-keys-configmap
+
+extraVolumeMounts:
+  - name: namespace-api-keys
+    mountPath: /var/lib/vector/data
+
+customConfig:
+  enrichment_tables:
+    keys:
+      type: "file"
+      file:
+        path: "/var/lib/vector/data/namespace-api-keys.csv"
+        encoding:
+          type: "csv"
+  sources:
+    datadog_agent:
+      address: 0.0.0.0:8282
+      type: datadog_agent
+      multiple_outputs: true
+      store_api_key: false # we will look up the key
+  transforms:
+    remap_logs:
+      type: remap
+      inputs:
+        - datadog_agent.logs
+      source: |
+        # Parse the received .ddtags field so we can more easily access the contained tags
+        .ddtags = parse_key_value!(.ddtags, key_value_delimiter: ":", field_delimiter: ",")
+
+        namespace = string(.ddtags.kube_namespace) ?? "default"
+
+        row, err = get_enrichment_table_record("keys", { "namespace": namespace })
+        if err != null {
+          log("could not find api key for namespace: " + namespace)
+          abort
+        }
+
+        set_metadata_field!("datadog_api_key", row.api_key)
+
+        # Re-encode Datadog tags as a string for the `datadog_logs` sink
+        .ddtags = encode_key_value(.ddtags, key_value_delimiter: ":", field_delimiter: ",")
+
+        # Datadog Agents pass a "status" field that is stripped when ingested
+        del(.status)
+    remap_metrics:
+      type: remap
+      inputs:
+        - datadog_agent.metrics
+      source: |
+        namespace = string(.tags.namespace) ?? "default"
+
+        row, err = get_enrichment_table_record("keys", { "namespace": namespace })
+        if err != null {
+          log("could not find api key for namespace: " + namespace)
+          abort
+        }
+
+        set_metadata_field!("datadog_api_key", row.api_key)
+  sinks:
+    datadog_logs:
+      type: datadog_logs
+      inputs: [remap_logs]
+      default_api_key: "" # no default
+    datadog_metrics:
+      type: datadog_metrics
+      inputs: [remap_metrics]
+      default_api_key: "" # no default
