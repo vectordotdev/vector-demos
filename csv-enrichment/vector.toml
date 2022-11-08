@@ -21,7 +21,7 @@ message = "string"
 
 # Generate user info messages
 [sources.user_info_messages]
-type = "generator"
+type = "demo_logs"
 format = "shuffle"
 lines = [
   '{"first_name": "Karolann", "last_name": "Wiza", "message": "Hello World"}',
