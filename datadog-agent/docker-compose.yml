@@ -14,16 +14,17 @@ services:
       - local
 
   vector:
-    image: timberio/vector:nightly-alpine
+    image: timberio/vector:latest-distroless-libc
     volumes:
       - ./vector/vector.toml:/etc/vector/vector.toml:ro
       - ./logs:/tmp/logs
     environment:
       - DD_API_KEY=${DD_API_KEY}
+      - VECTOR_CONFIG=/etc/vector/vector.toml
       # if you need vector to be verbose
       # - LOG=debug
     networks:
       - local
-    
+
 networks:
   local: {}
