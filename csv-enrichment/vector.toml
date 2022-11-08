@@ -34,7 +34,7 @@ interval = 2
 
 # Generate coded error messages
 [sources.coded_error_messages]
-type = "generator"
+type = "demo_logs"
 format = "shuffle"
 lines = [
   '{"code":1,"device_id":"e5ad503d","timestamp":"2021-10-18T15:35:09.158139Z"}',
@@ -47,7 +47,7 @@ interval = 2
 type = "remap"
 inputs = ["user_info_messages"]
 source = """
-. = parse_json(.message) ?? {}
+. = object!(parse_json(.message) ?? {})
 . |= get_enrichment_table_record("users", { "last_name": .last_name, "first_name": .first_name }) ?? {}
 """
 
@@ -55,14 +55,14 @@ source = """
 type = "remap"
 inputs = ["coded_error_messages"]
 source = """
-. = parse_json!(.message)
+. = object!(parse_json(.message) ?? {})
 
 row, err = get_enrichment_table_record("codes", { "code": del(.code) })
 
 if err != null {
   log(err, level: "error")
 } else {
-  . |= merge(., {"message": row.message, "tag": row.tag})
+  . |= {"message": row.message, "tag": row.tag}
 }
 """
 
