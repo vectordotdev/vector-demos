@@ -1,6 +1,12 @@
 hostname: datadog-agent
 
+tags:
+  - foo:bar
+
 logs_enabled: true
+
+logs_config:
+  expected_tags_duration: "1d"
 
 vector:
   logs:
