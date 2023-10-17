@@ -10,6 +10,9 @@ sources:
     type: datadog_agent
     address: '0.0.0.0:8080'
     store_api_key: false
+    multiple_outputs: true
+    disable_metrics: true
+    disable_traces: true
 sinks:
   file:
     type: file
@@ -22,7 +25,7 @@ sinks:
   datadog:
     type: datadog_logs
     inputs:
-      - agent
+      - agent.logs
     default_api_key: '${DD_API_KEY}'
     healthcheck:
       enabled: true
