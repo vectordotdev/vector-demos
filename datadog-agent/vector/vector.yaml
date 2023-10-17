@@ -13,6 +13,8 @@ sources:
     multiple_outputs: true
     disable_metrics: true
     disable_traces: true
+    decoding:
+      codec: json
 sinks:
   file:
     type: file
