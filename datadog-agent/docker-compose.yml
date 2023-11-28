@@ -14,9 +14,9 @@ services:
       - local
 
   vector:
-    image: timberio/vector:nightly-alpine
+    image: timberio/vector:latest-distroless-libc
     volumes:
-      - ./vector/vector.toml:/etc/vector/vector.toml:ro
+      - ./vector/vector.yaml:/etc/vector/vector.yaml:ro
       - ./logs:/tmp/logs
     environment:
       - DD_API_KEY=${DD_API_KEY}
@@ -24,6 +24,6 @@ services:
       # - LOG=debug
     networks:
       - local
-    
+
 networks:
   local: {}

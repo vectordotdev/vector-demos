@@ -1,6 +1,8 @@
-logs_config:
-  logs_dd_url: "vector:8080"
-  logs_no_ssl: true
-  use_http: true
+hostname: datadog-agent
 
 logs_enabled: true
+
+vector:
+  logs:
+    enabled: true
+    url: "http://vector:8080"

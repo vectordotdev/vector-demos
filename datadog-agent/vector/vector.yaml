@@ -1,0 +1,34 @@
+api:
+  enabled: true
+
+sources:
+  random:
+    type: demo_logs
+    format: json
+    interval: 2
+  agent:
+    type: datadog_agent
+    address: '0.0.0.0:8080'
+    store_api_key: false
+    multiple_outputs: true
+    disable_metrics: true
+    disable_traces: true
+    decoding:
+      codec: json
+sinks:
+  file:
+    type: file
+    inputs:
+      - random
+    path: /tmp/logs/vector-%Y-%m-%d.log
+    encoding:
+      codec: json
+      timestamp_format: rfc3339
+  datadog:
+    type: datadog_logs
+    inputs:
+      - agent.logs
+    default_api_key: '${DD_API_KEY}'
+    healthcheck:
+      enabled: true
+
