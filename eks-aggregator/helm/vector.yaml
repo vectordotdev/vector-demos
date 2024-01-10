@@ -68,7 +68,7 @@ customConfig:
         }
 
         # Re-encode Datadog tags as a string for the `datadog_logs` sink
-        .ddtags = encode_key_value!(.ddtags, key_value_delimiter: ":", field_delimiter: ",")
+        .ddtags = encode_key_value(.ddtags, key_value_delimiter: ":", field_delimiter: ",")
   sinks:
     to_datadog:
       type: datadog_logs
