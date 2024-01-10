@@ -1,0 +1,6 @@
+version: '3.8'
+services:
+  vector:
+    image: timberio/vector:nightly-alpine
+    volumes:
+      - ./vector:/etc/vector:ro
