@@ -1,0 +1,27 @@
+datadog:
+  kubelet:
+    tlsVerify: false # for minikube
+  logLevel: info
+  logs:
+    enabled: true
+    containerCollectAll: true
+  prometheusScrape:
+    enabled: true
+  apm:
+    portEnabled: true
+  containerExclude: "kube_namespace:.*"
+  containerInclude: "kube_namespace:foo kube_namespace:bar"
+agents:
+  useConfigMap: true
+  customAgentConfig:
+    vector:
+      logs:
+        enabled: true
+        url: "http://vector:8282"
+      metrics:
+        enabled: true
+        url: "http://vector:8282"
+    apm_config:
+      enabled: true
+      receiver_port: 8126
+      apm_dd_url: "http://vector:8282"
