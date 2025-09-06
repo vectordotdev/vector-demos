@@ -1,0 +1,15 @@
+[sources.random]
+type = "demo_logs"
+format = "json"
+
+[sinks.blackhole]
+type = "blackhole"
+inputs = ["random"]
+
+[sources.internal_metrics]
+type = "internal_metrics"
+
+[sinks.prometheus]
+type = "prometheus_exporter"
+inputs = ["internal_metrics"]
+address = "0.0.0.0:9090"
